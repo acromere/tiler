@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.avereon.pom</groupId>
+		<artifactId>jar</artifactId>
+		<version>3.5.3</version>
+	</parent>
+
+	<groupId>com.avereon</groupId>
+	<artifactId>tile-rename</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>Tile Rename</name>
+	<description>Utility library</description>
+	<inceptionYear>2023</inceptionYear>
+
+	<developers>
+		<developer>
+			<name>Mark Soderquist</name>
+			<email>mark@soderquist.net</email>
+			<roles>
+				<role>Architect</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<repositories>
+		<repository>
+			<id>avn</id>
+			<url>https://repo.avereon.com/avn</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<!-- Version numbers updated 07 Mar 2023 -->
+
+		<product-name>${project.name}</product-name>
+		<product-identifier>${project.artifactId}</product-identifier>
+		<project-timestamp>${maven.build.timestamp}</project-timestamp>
+
+		<!-- Needs to stay at a version compatible with all projects and the website -->
+		<!-- Keep consistent with the CI pipeline -->
+		<java.version>17</java.version>
+	</properties>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<failOnError>false</failOnError>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
+
