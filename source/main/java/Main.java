@@ -10,8 +10,8 @@ public class Main {
 	public static void main( String[] args ) {
 		Path path = Paths.get( System.getProperty( "user.home" ), "PDF" );
 
-		String project = "Eagle V";
-		char sheet = 'K';
+		String project = "Endeavor I";
+		char sheet = 'A';
 		int row = 1;
 		int col = 1;
 		try( Stream<Path> stream = Files.list( path ) ) {
@@ -31,11 +31,11 @@ public class Main {
 				Files.move( source, target );
 
 				col++;
-				if( col > 3 ) {
+				if( col > 4 ) {
 					col = 1;
 					row++;
 				}
-				if( row > 3 ) {
+				if( row > 2 ) {
 					row = 1;
 					sheet++;
 				}
