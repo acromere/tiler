@@ -1,0 +1,109 @@
+name: Acromere Tiler CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  ACM_PRODUCT: "tiler"
+  # The default release, should be overridden in config.sh
+  ACM_RELEASE: "latest"
+  # The default platform, should be overridden in the platform binaries jobs below
+  ACM_PLATFORM: "linux"
+
+  ACM_GPG_PASSWORD: ${{ secrets.ACM_GPG_PASSWORD }}
+  ACM_KEYSTORE_PASSWORD: ${{ secrets.ACM_KEYSTORE_PASSWORD }}
+  ACM_MAVEN_REPO_USERNAME: ${{ secrets.ACM_MAVEN_REPO_USERNAME }}
+  ACM_MAVEN_REPO_PASSWORD: ${{ secrets.ACM_MAVEN_REPO_PASSWORD }}
+  ACM_XENON_REPO_USERNAME: ${{ secrets.ACM_XENON_REPO_USERNAME }}
+  ACM_XENON_REPO_PASSWORD: ${{ secrets.ACM_XENON_REPO_PASSWORD }}
+
+  DISPLAY: ":99"
+  GITHUB_REF: ${{ github.ref }}
+  JAVA_VERSION: "25"
+  MAVEN_PARMS: "-B -U -V --settings .github/settings.xml --file pom.xml"
+  XVFB_PARMS: "-screen 0 1920x1080x24 -nolisten unix"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v6
+
+      - name: Fetch CI/CD resources
+        uses: actions/checkout@v6
+        with:
+          repository: acromere/canoe
+          path: .github
+
+      - name: Configuration
+        shell: bash
+        run: |
+          source .github/config.sh
+
+      # Required to render the product icon
+      - name: Set up Virtual Display
+        run: |
+          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{env.JAVA_DISTRO}}
+          java-version: ${{env.JAVA_VERSION}}
+
+      - name: Maven Repository Cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Compile
+        run: |
+          mvn ${{env.MAVEN_PARMS}} compile
+
+      - name: Unit Tests
+        run: |
+          mvn ${{env.MAVEN_PARMS}} test
+
+      - name: Deploy Arifacts
+        run: |
+          mvn ${{env.MAVEN_PARMS}} deploy -Dmaven.test.skip=true
+
+#      - name: Deploy JavaDoc
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.JAVADOC_DEPLOY_PATH}};"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -B target/${ACM_PRODUCT}-*-javadoc.jar ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${{env.JAVADOC_DEPLOY_PATH}}/javadoc.jar 2>&1
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.JAVADOC_TARGET_PATH}};rm -rf ${{env.JAVADOC_TARGET_PATH}}/*;unzip -o ${{env.JAVADOC_DEPLOY_PATH}}/javadoc.jar -d ${{env.JAVADOC_TARGET_PATH}}"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#
+#      - name: Build Packs
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} verify -P testui,packs
+#
+#      - name: Deploy Product Pack
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -B target/*product.jar ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+#
+#      - name: Deploy Product Icon
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -B target/main/images/*product.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+#
+#      - name: Deploy Product Card
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -B target/main/java/META-INF/*.card ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1

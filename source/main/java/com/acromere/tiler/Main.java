@@ -1,3 +1,5 @@
+package com.acromere.tiler;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +43,7 @@ public class Main {
 				}
 			}
 		} catch( Exception exception ) {
-			exception.printStackTrace();
+			exception.printStackTrace( System.out );
 		}
 	}
 
