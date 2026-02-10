@@ -12,11 +12,10 @@
 	</parent>
 
 	<groupId>com.acromere</groupId>
-	<artifactId>tile-rename</artifactId>
+	<artifactId>tiler</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-
-	<name>Tile Rename</name>
+	<name>Tiler</name>
 	<description>Utility library</description>
 	<inceptionYear>2023</inceptionYear>
 
